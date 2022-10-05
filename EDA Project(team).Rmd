@@ -1,0 +1,260 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<span style="font-size:30px; font-family:'Times New Roman'; color:red;"><b><u><center>EXPLORATORY DATA ANALYSIS ON MEDICAL COST PERSONAL DATASET</center></u></b></span>
+
+<span style="color:blue; font-size:25px; font-family:'Times New Roman'"><b><u>Data Description</u></b></span>
+
+#### <span style = "color:black">*This dataset explains the cost of a small sample of USA population Medical Insurance Cost based on some attributes such as age, sex, bmi etc.This dataset corresponds to a practical used in the book Machine Learning with R by Brett Lantz; which is a book that provides an introduction to machine learning using R. All of these datasets are in the public domain but simply needed some cleaning up and recoding to match the format in the book.*</span>
+
+<span style= "color:blue;font-size:20px"><b><u>Columns</u></b></span>
+
+#### <span style = "color:black">**Age**: *Age of primary beneficiary*</span>
+
+#### <span style = "color:black">**Sex**: *Insurance contractor gender, female, male*</span>
+
+#### <span style = "color:black">**BMI**: *Body mass index, providing an understanding of body, weights that are relatively high or low relative to height, objective index of body weight (kg / m ^ 2) using the ratio of height to weight, ideally 18.5 to 24.9*</span>
+
+#### <span style = "color:black">**Children**: *Number of children covered by health insurance / Number of dependents*</span>
+
+#### <span style = "color:black">**Smoker**: *Smoking*</span>
+
+#### <span style = "color:black">**Region**: *The beneficiary's residential area in the US, northeast, southeast, southwest, northwest.*</span>
+
+#### <span style = "color:black">**Charges**: *Individual medical costs billed by health insurance*</span>
+
+<span style="color:blue; font-size:25px;font-family:'Times New Roman'"><b><u>R Packages</u></b></span>
+
+```{r}
+library(readr)              #read in the data
+library(ggplot2)            #visualization 
+library(corrplot)           #visualization of correlation
+library(tidyverse)          #used for data transformations
+library(gridExtra)          #used for extension to a grid system
+```
+
+<span style="color:blue; font-size:25px;font-family:'Times New Roman'"><b><u>Reading and Understanding data</u></b></span>
+
+```{r}
+insurance_data=read.csv("C:\\Users\\Shruti Saraf\\OneDrive\\Desktop\\Project\\Medical Cost Personal Datasets.csv")
+
+View(insurance_data)
+
+glimpse(insurance_data)
+
+str(insurance_data)
+
+summary(insurance_data)
+
+```
+
+##### **Interpretation**:- The respondents’ gender and region of origin is evenly distributed, having age ranging from 18 to 64 years old. Non-smokers outnumber smokers 4 to 1. The average, medical cost is USD 13,270 with a median value of USD 9382.
+
+<span style="color:blue; font-size:25px;font-family:'Times New Roman'"><b><u>Exploratory Data Analysis (EDA)</u></b></span>
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = age))+
+  geom_density(color = "black",fill="pink")
+```
+
+##### **Interpretation**:- Policy holder are mostlty on the younger side with age 20 and very few people have age around 70
+
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = sex,y=(..count../sum(..count..)),fill=sex))+
+  geom_bar()+labs(x="sex",y="probability")
+  
+```
+
+##### **Interpretation**:- Male - 50.52% and Female - 49.48%
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = bmi))+
+  geom_histogram(color = "black",fill="Blue",bins=10 ) 
+```
+
+##### **Interpretation**:- Mostly the BMI is 30.
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = children,fill=as.factor(children)))+
+  geom_bar(  color = "black") 
+```
+
+##### **Interpretation**:- Maximum people does not have any child.
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = smoker,fill=smoker))+
+  geom_bar(  color = "black") 
+```
+
+##### **Interpretation**:- 20.48% are smokers
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = region,fill=as.factor(region)))+
+  geom_bar(color = "black")
+
+```
+
+##### **Interpretation**:- People mostly belong from southeast side.
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = charges))+
+  geom_density(fill = 69)
+```
+
+##### **INRERPRETATION**:- Maximum people pays charges upto 20,000
+
+<span style="color:blue; font-size:25px;font-family:'Times New Roman'"><b><u>Correlation Plot</u></b></span>
+
+```{r}
+insurance_data1=insurance_data
+insurance_data1$sex=as.numeric(factor(insurance_data1$sex,levels = c("female","male"),labels = c(0,1)))
+insurance_data1$smoker=as.numeric(factor(insurance_data1$smoker,levels = c("no","yes"),labels = c(0,1)))
+insurance_data1$region=as.numeric(factor(insurance_data1$region,levels = c("southwest","southeast","northwest","northeast"),labels = c(0,1,2,3)))
+str(insurance_data1)
+corr_mtx=round(cor(insurance_data1),1)
+corr_mtx
+corrplot(corr_mtx,method = "circle",type = "upper")
+```
+
+##### **Interpretation**:- As Smokers and charges are strongly correlated with charges, age is also correlated with charges followed by bmi,sex and children.
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = region , y = charges , fill = region))+
+  geom_boxplot()+
+  theme_gray()+
+  ggtitle("Boxplot of Medical charges per region")+
+  coord_flip()
+```
+
+##### **Interpretation**:- Region doesn't have much impact on the medical cost. 
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = smoker , y = charges , fill = smoker))+
+  geom_boxplot()+
+  theme_gray()+
+  ggtitle("Boxplot of Medical Charges by Smoking Status")
+```
+
+##### **Interpretation**:- Smokers spends a lot more in terms of medical expenses compared to non-smokers by almost 4x.
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = sex , y = charges , fill = sex))+
+  geom_boxplot()+
+  theme_gray()+
+  ggtitle("Boxplot of Medical Charges by Gender")
+```
+
+##### **Interpretation**:- The Sex of the policy holder has no significant effect on Charges. This corresponds to the previous boxplots, which showed that Male and Female policy holders have very similar mean Charges.
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = as.factor(children) , y = charges , fill = children))+
+  geom_boxplot()+
+  theme_gray()+
+  labs(x="children")+
+  ggtitle("Boxplot of Medical Charges by Children")
+
+```
+
+##### **Interpretation**:- The number of Children has a significant effect on Charges.This corresponds with the boxplots that showed increasing mean charges from 1 to 4 Children.
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = bmi , y = charges))+
+  geom_point()+
+  theme_gray()+
+  ggtitle("Scatter plot of Medical Charges by Bmi")
+```
+
+##### **Interpretation**:- Based on above plot, Bmi increases, charges increases
+
+```{r}
+ggplot(data=insurance_data,mapping=aes(x=age,y=charges))+
+  geom_point(color = "blue")+
+  ggtitle("Scatter Plot of Medical charges Vs Age")
+```
+
+##### **Interpretation**:- Charges increases as Age goes up. 
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = age , y = charges , color = smoker))+
+  geom_point(size = 1.5)+
+  theme_gray()
+
+```
+
+##### **Interpretation**:- Smokers with increase in age has higher charges as compare to non-smokers with increase in age.
+
+```{r}
+ggplot(data = insurance_data , mapping = aes(x = age , y = charges , fill = sex))+
+  geom_boxplot()+
+  theme_gray()+
+  facet_wrap(~region)
+```
+
+
+```{r}
+ggplot(data = insurance_data , aes(x = age , y = charges))+
+  geom_point(aes(color = smoker , size = bmi , alpha = 0.05))
+  
+```
+
+##### **Interpretation**:- Smokers with increase in age who have higher bim have to pay more charges.
+
+```{r}
+insurance_data <- insurance_data %>% 
+  mutate(bmi_category = case_when(
+    bmi < 18.5 ~ "underweight",
+    bmi < 25 ~ "healthy weight",
+    bmi < 30 ~ "overweight",
+    bmi >= 30 ~ "obesity"
+  ))
+insurance_data$bmi_category = factor(insurance_data$bmi_category, 
+                    levels = c("underweight", 
+                               "healthy weight",
+                               "overweight",
+                               "obesity"))
+ggplot(insurance_data, aes(x = age, y = charges, color = bmi_category)) +
+  geom_point() +
+  facet_wrap(~bmi_category)
+```
+
+##### **Interpretation**:- With increase in age, people who have more bmi have to pay more charges compared to others.
+
+```{r}
+ggplot(insurance_data, aes(x = age, y = charges, color = bmi_category,shape = smoker)) +
+  geom_point()+
+  facet_grid(~children)+
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+##### **Interpretation**:- Policy holders with 4 and 5 children having very less smokers with less charges with all categories for bmi.Policy holders with no child having smokers with more bmi has to pay more charges
+
+
+```{r}
+p1=ggplot(data = insurance_data , mapping = aes(x = bmi , y = charges , color = smoker ))+
+  geom_point(size =1.5)+
+  theme_gray()
+
+p2=ggplot(insurance_data,aes(x=bmi_category,y=charges,fill=smoker))+
+  geom_col(position = "dodge")+scale_x_discrete(labels = c("healthy weight","obesity","overweight","underweight"))+
+  theme(axis.text.x = element_text(angle = 45,hjust = 1,size=10))
+
+grid.arrange(p1,p2,nrow=1,ncol=2)
+```
+
+##### **Interpretation**:- The BMI Category that is significantly related to Charges is Underweight, which has expected charges 1386 dollars lower than people with a Normal BMI. In addition,there are significant interaction effects between BMI Categories and Smoking. For policy holders who are Obese , Underweight, or Overweight, the effect of Smoking on Charges will be stronger than for the Smokers who are of Normal weight.
+
+<span style="color:blue; font-size:25px;font-family:'Times New Roman'"><b><u>EDA Conclusion</u></b></span>
+
+#### <span style="color:black">•	The biggest factor that increases the charges is if the individual is a smoker.</span>
+
+#### <span style="color:black">•	Age is another contributing factor, but not nearly as large as being a smoker.</span>
+
+#### <span style="color:black">•	BMI actually appears to have little effect on charges in this dataset.</span>
+
+#### <span style="color:black">•	Region, sex, and having dependents on plan isn't a factor that increases charges.</span>
+
+#### <span style="color:black">•	Policy Holders with no child have impact on charges than policy holders with 5 children.
+
